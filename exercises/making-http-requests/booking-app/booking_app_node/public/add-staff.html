@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="UTF-8">
+    <title>Add Staff</title>
+  </head>
+  <body>
+    <form method="post" action="/api/staff_members">
+      <dl>
+        <dt>
+          <label for="email">Email</label>
+        </dt>
+        <dd>
+          <input type="email" id="email" name="email">
+        </dd>
+        <dt>
+          <label for="name">Name</label>
+        </dt>
+        <dd>
+          <input type="text" id="name" name="name">
+        </dd>
+      </dl>
+      <input type="submit">
+    </form>
+  </body>
+  <script>
+    function isValidInput() {
+      email = document.getElementById('email').value;
+      name = document.getElementById('name').value;
+      return (name !== '') && (email !== '');
+    }
+
+    let form = document.querySelector('form');
+    document.addEventListener('DOMContentLoaded', () => {
+      form.addEventListener('submit', event => {
+        event.preventDefault(); // prevent the browser from submitting the form
+  
+        if (!isValidInput()) {
+          alert('Staff can not be created. Check your inputs');
+          return;
+        }
+  
+        let data = new FormData(form);
+        let request = new XMLHttpRequest();
+        request.open('POST', form.action);
+  
+        request.addEventListener('load', () => {
+          if (request.status === 201) {
+            let id = JSON.parse(request.responseText)['id']
+            alert(`Successfully created staff with id: ${id}`);
+          }
+        });
+  
+        request.send(data);
+      });
+    });
+  </script>
+</html>
