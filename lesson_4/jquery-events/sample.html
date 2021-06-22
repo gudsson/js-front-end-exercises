@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>your page title goes here</title>
+    <meta charset="utf-8" />
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"></script>
+    <script>
+      $(function() {
+        let char = '';
+
+        $('form').submit(e => {
+            e.preventDefault();
+            char = $('input[type=text]').val();
+        });
+        
+        $(document).off('keypress').on('keypress', e => {
+            if (e.key !== char) return;
+            $('a').trigger('click');
+        });
+        
+        $('a').click(e => {
+            e.preventDefault();
+            $('#accordion').slideToggle();
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <form action="#" method="post">
+      <input type="text" id="inputText" name="inputText" maxlength="1"><br><br>
+      <input type="submit" value="Submit">
+    </form>
+    <p>
+      <a href="#">Toggle accordion</a>
+    </p>
+    <div id="accordion">
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+      </p>
+    </div>
+  </body>
+</html>

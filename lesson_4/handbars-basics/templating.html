@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>HTML Templating With Javascript</title>
+  <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+</head>
+  <body>
+    <script id='productTemplate' type='text/x-handlebars'>
+      <li>
+        <h3>{{name}}</h3>
+        <dl>
+          <dt>Quantity:</dt>
+          <dd>{{quantity}}</dd>
+          <dt>Price:</dt>
+          <dd>
+            ${{price}}
+            {{#if on_sale}}
+            <strong>SALE!</strong>
+            {{/if}}
+          </dd>
+        </dl>
+      </li>
+    </script>
+    <script id='productsList' type='text/x-handlebars'>
+      {{#each items}}
+      {{> productTemplate}}
+      {{/each}}
+    </script>
+    
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function() {
+      let products = [{
+          name: 'Banana',
+          quantity: 14,
+          price: 0.79
+        }, {
+          name: 'Apple',
+          quantity: 3,
+          price: 0.55
+        }];
+      
+      let productsList = Handlebars.compile($('#productsList').html());
+      let productTemplate = Handlebars.compile($('#productTemplate').html());
+      let $list = $('<ul></ul>');
+
+      Handlebars.registerPartial('productTemplate', $('#productTemplate').html());
+
+      $list.html(productsList({ items: products }));
+
+      let newProduct = {
+        name: 'Soup',
+        quantity: 1,
+        price: 1.29
+      };
+      
+      $list.append(productTemplate(newProduct));
+      
+      $(document.body).append($list);
+    });
+    </script>
+  </body>
+</html>
