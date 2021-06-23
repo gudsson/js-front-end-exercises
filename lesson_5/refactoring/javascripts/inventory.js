@@ -46,28 +46,26 @@ var inventory;
       var id = this.findID($item),
           item = this.get(id);
 
-      item.name = $item.find("[name^=item_name]").val();
-      item.stock_number = $item.find("[name^=item_stock_number]").val();
-      item.quantity = $item.find("[name^=item_quantity]").val();
+      item.name = $item.querySelector("[name^=item_name]").value;
+      item.stock_number = $item.querySelector("[name^=item_stock_number]").value;
+      item.quantity = $item.querySelector("[name^=item_quantity]").value;
     },
     newItem: function(e) {
       e.preventDefault();
       var item = this.add(),
-          $item = $(this.template.replace(/ID/g, item.id));
+          builtItem = this.template.replace(/ID/g, item.id);
 
-      $("#inventory").append($item);
+      document.getElementById('inventory').insertAdjacentHTML("beforeend", builtItem);
     },
     findParent: function(e) {
-      return $(e.target).closest("tr");
+      return e.target.closest("tr");
     },
     findID: function($item) {
-      return +$item.find("input[type=hidden]").val();
+      return +$item.querySelector("input[type=hidden]").value;
     },
     deleteItem: function(e) {
       e.preventDefault();
-      var $item = this.findParent(e).remove();
-
-      this.remove(this.findID($item));
+      var item = this.findParent(e).remove();
     },
     updateItem: function(e) {
       var $item = this.findParent(e);
@@ -75,10 +73,18 @@ var inventory;
       this.update($item);
     },
     bindEvents: function() {
-      
-      $("#add_item").on("click", $.proxy(this.newItem, this));
-      $("#inventory").on("click", "a.delete", $.proxy(this.deleteItem, this));
-      $("#inventory").on("blur", ":input", $.proxy(this.updateItem, this));
+      let invElement = document.getElementById('inventory');
+      document.getElementById('add_item').addEventListener('click', this.newItem.bind(this));
+
+      invElement.addEventListener('click', e => {
+        if (e.target.tagName === 'A' && e.target.classList.contains('delete')) {
+          this.deleteItem(e);
+        }
+      });
+
+      invElement.addEventListener('focusout', e => {
+        if (e.target.tagName === 'INPUT') this.updateItem(e);
+      });
     },
     init: function() {
       this.setDate();
@@ -88,4 +94,6 @@ var inventory;
   };
 })();
 
-$($.proxy(inventory.init, inventory));
+document.addEventListener('DOMContentLoaded', function() {
+  inventory.init.bind(inventory)();
+});
