@@ -567,3 +567,7 @@ p.deprecated span{
   }
 
 } /* /@media print */
+
+.hide {
+  display: none;
+}

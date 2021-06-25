@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Book Timeslot</title>
+    <meta charset="utf-8" />
+    <link href="css/style.css" rel="stylesheet" media="screen, print">
+  </head>
+  <body>
+    <h1>Schedule</h1>
+    <p class="loading">Loading...</p>
+    <div class="loading hide">
+      <form method="POST" action="/api/bookings" id="schedule_selector">
+        Please select one schedule: <select name="id" id="id"></select><br>
+        Email: <input type="email" name="student_email" id="student_email" required>
+        <input type="submit" id="submit_booking">
+      </form>
+    </div>
+    <div class="hide" id="add_student" style='background-color: lightgray; padding: 10px; margin-top: 20px;'>
+      <h3>Please provide new student details</h3>
+      <form method="POST" action="/api/students">
+        Email: <input type="email" name="email" id="new_email" style='background-color: lightgray;' readonly><br>
+        Name: <input type="text" name="name" id="student_name" required><br>
+        Booking Sequence: <input type="text" name="booking_sequence" id="booking_sequence" style='background-color: lightgray;' readonly><br>
+        <input type="submit">
+      </form>
+    </div>
+  </body>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let loading = true;
+      let scheduleForm = document.querySelector('form#schedule_selector');
+
+      getDropdownData();
+
+      scheduleForm.addEventListener('submit', e => {
+        e.preventDefault();
+
+        let bookingId = +scheduleForm.querySelector('#id').value;
+        let email = scheduleForm.querySelector('#student_email').value.toLowerCase();
+        let data = { "id": bookingId, "student_email": email };
+
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/bookings');
+        xhr.setRequestHeader("Content-type", "application/json");
+
+        xhr.addEventListener('load', e => {
+          if (xhr.status !== 204) {
+            alert(xhr.responseText);
+            document.getElementById('new_email').value = email;
+            document.getElementById('booking_sequence').value = xhr.responseText.match(/\d+/g);
+            
+            let container = document.getElementById('add_student');
+            let form = container.querySelector('form');
+            container.classList.remove('hide');
+            document.getElementById('student_name').focus();
+
+            form.addEventListener('submit', e => {
+              e.preventDefault();
+              let data = new FormData(form);
+              let xhr = new XMLHttpRequest();
+              xhr.open('POST', 'api/students');
+              xhr.addEventListener('load', function() {
+                if (xhr.status === 201) {
+                  addStudentSuccess(container);
+                } else alert('failed to add student');
+              });
+              xhr.send(data);
+            });
+          } else bookingSuccess();
+        });
+
+        xhr.send(JSON.stringify(data));
+      });
+
+      function addStudentSuccess(container) {
+        alert('student successfully added');
+        container.querySelector('form').reset();
+        container.classList.add('hide');
+        document.getElementById('submit_booking').click();
+      }
+
+      function bookingSuccess() {
+        alert('booking added');
+        scheduleForm.reset();
+        console.log('hello')
+        getDropdownData();
+      }
+
+      function getDropdownData() {
+        let request = new XMLHttpRequest();
+        request.open('GET', '/api/schedules');
+        request.responseType = 'json';
+        
+        request.addEventListener('load', () => {
+          let schedules = request.response.filter(schedule => schedule.student_email === null);
+          let staff;
+  
+          let xhr = new XMLHttpRequest();
+          xhr.open('GET', '/api/staff_members');
+          xhr.responseType = 'json';
+  
+          xhr.addEventListener('load', () => {
+            staff = xhr.response;
+
+            [...schedules].forEach(schedule => {
+              schedule.staff_name = staff.filter(member => member.id === schedule.staff_id)[0].name;
+            });
+
+            populateDropdown(schedules);
+
+            if (loading) {
+              loading = false;
+              document.querySelectorAll('.loading').forEach(el => el.classList.toggle('hide'));    
+            }
+          });
+  
+          xhr.send();
+        });
+  
+        request.send();  
+      }
+
+      function populateDropdown(data) {
+        let dropdown = document.getElementById('id');
+        let optionNodes = data.map(sched => {
+          let option = document.createElement('option')
+          let text = `${sched.staff_name} | ${sched.date} | ${sched.time}`;
+
+          option.setAttribute('value', sched.id);
+          option.textContent = text;
+          return option;
+        });
+        dropdown.innerHTML = '';
+        optionNodes.forEach(option => dropdown.appendChild(option));
+      }
+    });
+  </script>
+</html>

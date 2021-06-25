@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Adding Schedules</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <button id="add_schedule">Add Schedule</button>
+    <br><br>
+    <form action="/api/schedules" method="POST">
+      <div id="schedules">
+        <table id="schedule_1">
+          <tbody>
+            <tr>
+              <th>
+                Schedule 1
+              </th>
+            </tr>
+            <tr>
+              <td>
+                Staff Name:
+              </td>
+              <td>
+                <select name="staff_member1" id="staff_member1"></select>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Date:
+              </td>
+              <td>
+                <input type="text" id="date_1" name="date_1" placeholder="mm-dd-yy" required>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Time:
+              </td>
+              <td>
+                <input type="text" id="time_1" name="time_1" placeholder="hh:mm" required>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <br>
+      <input type="submit">
+    </form>
+  </body>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const form = document.querySelector('form');
+      const request = new XMLHttpRequest();
+
+      request.open('GET', 'http://localhost:3000/api/staff_members');
+      
+      request.responseType = 'json';
+      
+      request.addEventListener('load', () => { populateStaffDropdown(request.response) })
+
+      request.send();
+      
+      document.getElementById('add_schedule').addEventListener('click', addNewSchedule);
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+
+        let data = {};
+        
+        let schedules = document.getElementById('schedules').children;
+
+        data.schedules = [...schedules].map(schedule => {
+          return {
+            "staff_id": +schedule.querySelector('[id^=staff_member]').value,
+            "date": schedule.querySelector('[id^=date]').value,
+            "time": schedule.querySelector('[id^=time]').value
+           };
+        })
+
+        let request = new XMLHttpRequest();
+        request.open('POST', form.action);
+        request.setRequestHeader("Content-type", "application/json");
+        
+        request.addEventListener('load', () => {
+          if (request.status === 201) alert('Schedules added');
+        });
+
+        request.send(JSON.stringify(data));
+      });
+
+      function populateStaffDropdown(staffArr) {
+        let optionNodes = staffArr.map(staffMember => {
+          let option = document.createElement('option')
+          option.setAttribute('value', staffMember.id);
+          option.textContent = staffMember.name;
+          return option;
+        });
+
+        optionNodes.forEach(option => document.getElementById('staff_member1').appendChild(option));
+      }
+
+      function addNewSchedule() {
+        let schedules = document.getElementById('schedules');
+        let scheduleTmpl = schedules.children[0];
+
+        let newSchedule = scheduleTmpl.cloneNode(true)
+        
+        incrementSchedule(newSchedule);
+        schedules.appendChild(newSchedule);
+      }
+
+      function incrementSchedule(scheduleNode) {
+        let count = document.getElementById('schedules').children.length + 1;
+        
+        scheduleNode.setAttribute('id', `schedule_${count}`);
+
+        let heading = scheduleNode.querySelector('th');
+        heading.textContent = heading.textContent.replace(/\d+/, count);
+
+        let dropdown = scheduleNode.querySelector('[id^=staff_member]');
+        dropdown.setAttribute('id', `staff_member${count}`);
+        dropdown.setAttribute('name', `staff_member${count}`);
+
+        let date = scheduleNode.querySelector('[id^=date_]');
+        date.setAttribute('id', `date_${count}`);
+        date.setAttribute('name', `date_${count}`);
+
+        let time = scheduleNode.querySelector('[id^=time_]');
+        time.setAttribute('id', `time_${count}`);
+        time.setAttribute('name', `time_${count}`);
+      }
+    });
+  </script>
+</html>
