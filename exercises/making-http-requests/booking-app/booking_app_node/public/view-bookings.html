@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>View Bookings</title>
+    <meta charset="utf-8" />
+    <link href="css/style.css" rel="stylesheet" media="screen, print">
+  </head>
+  <body>
+    <h1>Bookings</h1>
+    <div id="bookings">
+      <ul id="booking-list"></ul>
+    </div>
+  </body>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let xhr = new XMLHttpRequest();
+      xhr.open('GET', '/api/bookings');
+      xhr.responseType = 'json';
+
+      xhr.addEventListener('load', function() {
+        let dates = xhr.response;
+        let bookingData = {};
+        let ul = document.getElementById('booking-list');
+
+        dates.forEach(date => {
+          
+          let xhr = new XMLHttpRequest();
+          xhr.open('GET', `/api/bookings/${date}`);
+          xhr.responseType = 'json';
+
+          xhr.addEventListener('load', function() {
+            let bookings = xhr.response.map(booking => booking.join(' | '));
+            let li = document.createElement('li');
+            li.textContent = date;
+
+            let bookingUl = document.createElement('ul');
+            bookingUl.classList.add('hide');
+
+            bookings.forEach(booking => {
+              let bookingLi = document.createElement('li');
+              bookingLi.textContent = booking;
+              bookingUl.appendChild(bookingLi);
+            });
+
+            li.appendChild(bookingUl);
+
+            li.addEventListener('click', e => {
+              e.preventDefault();
+              li.children[0].classList.toggle('hide');
+            });
+
+            ul.appendChild(li);
+          });
+
+          xhr.send();
+        }); 
+      });
+
+      xhr.send();
+    });
+  </script>
+</html>
