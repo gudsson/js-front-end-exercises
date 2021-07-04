@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    <form id="form" method="post" action="todos">
+      <p>
+        <label>Todo title</label><br>
+        <input type="text" name="title">
+      </p>
+      <p>
+        <label>Description</label><br>
+        <input type="text" name="description">
+      </p>
+      <p>
+        <button type="submit">Submit</button>
+      </p>
+    </form>
+  </body>
+  <script>
+document.addEventListener('load', e => {
+  let form = document.getElementById('form');
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    
+    let request = new XMLHttpRequest();
+    request.open(form.method, form.action);
+
+    let data = new FormData(form);
+
+    request.addEventListener('load', e => {
+      alert(request.response);
+    });
+
+    request.send(data);
+});
+  </script>
+
+  
+</html>

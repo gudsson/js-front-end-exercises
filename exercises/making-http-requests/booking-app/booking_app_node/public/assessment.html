@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Assessment Sandbox</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <form method="post" action="/api/staff_members">
+      Name: <input type="text" name="name" id="name" /><br>
+      Email: <input type="text" name="email" id="email" /><br><br>
+      <input type="submit" name="submit" />
+    </form>
+  </body>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      let form = document.querySelector('form');
+
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        
+        let request = new XMLHttpRequest();
+        request.open('POST', form.action);
+        
+        request.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+
+        let data = {};
+        data.name = document.getElementById('name').value;
+        data.email = document.getElementById('email').value;
+        
+        let json = JSON.stringify(data);
+
+        request.addEventListener('load', e => {
+          alert(request.response);
+        });
+
+        request.send(json);
+
+        // POST /books HTTP/1.1
+        // Host: ls-230-book-catalog.herokuapp.com
+        // Content-Type: application/json; charset=utf-8
+        // Accept: */*
+
+        // {"title": "Eloquent JavaScript", "author": "Marijn Haverbeke"}
+      });
+    });
+  </script>
+</html>
